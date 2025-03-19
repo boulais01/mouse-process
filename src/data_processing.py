@@ -7,9 +7,12 @@ import os
 from pathlib import Path
 
 path = Path("research-data/data")
-var_defaults_fetch = {"quest": "fetch", "location": "", "plant_known": 0, "unicorn": 0, "armor": 1, "village": 0}
-var_defaults_save = {"quest": "save", "location": "", "direction": "", "armor": True, "sword": True, "injured": 0, "trophies_drake": False, "tunnel": False, "nest_know": False, "around": False, "approach": "", "chick": "", "griffin_hp": 4, "observed": False, "ledge": False, "dawn": 0, "trapped": False}
-var_defaults_bandit = {"quest": "bandit", "camp_known": False, "location": "", "direction": "", "armor": True, "sword": True, "injured": 0, "trophies_drake": False, "day": False, "spoken": False}
+var_defaults = {
+                    "fetch": {"location": "", "plant_known": 0, "unicorn": 0, "armor": 1, "village": 0},
+                    "save": {"location": "", "direction": "", "armor": True, "sword": True, "injured": 0, "trophies_drake": False, "tunnel": False, "nest_know": False, "around": False, "approach": "", "chick": "", "griffin_hp": 4, "observed": False, "ledge": False, "dawn": 0, "trapped": False},
+                    "bandit": {"camp_known": False, "location": "", "direction": "", "armor": True, "sword": True, "injured": 0, "trophies_drake": False, "day": False, "spoken": False}
+                }
+
 # list of lists; each list a line, do each line data from list in notebook
 # passage, time between mouse moves, distance between mouse moves, quadrant(s)
 #               ^out of total passage time?
@@ -36,12 +39,9 @@ for folder in path.iterdir():
 
                 for i in range(len(data) - 1):
                     if isinstance(data[i], list) or isinstance(data[i], dict):
-                        if len(data[i]) < 40:
-                            states_sorting[i] = data[i]
+                        states_sorting[i] = data[i]
                     else:
                         states_sorting[i] = data[i]
-                # TODO: 4 and 5 are just copies of width and height, try/except for values > 5 and values < len(data)
-                # that puts all the unlabeled vars in a list, compare to relevant values in listed passages to determine identity
                 """
                 {0: 1740597714729, 1: [{'passage': 'Disclaimer and Consent', 'time': 1740597728161}, 
                 {'passage': 'The Beginning', 'time': 1740597744974}, {'passage': 'Save the Prince From the Griffon', 'time': 1740597752255},
@@ -82,15 +82,20 @@ for folder in path.iterdir():
                 for passage in states_sorting[1]:
                     time_dict[passage["passage"]] = passage["time"] - last_time
                     last_time = passage["time"]
+                
+                run_vars = var_defaults[states_sorting[7]]
+                sort_count = 8
+                # make a default dict for mountain versus forest save
+                for key in run_vars.keys():
+                    run_vars[key] = states_sorting[sort_count]
+                    sort_count += 1
 
-                # TODO: also time math
-
+                states = {"times": time_dict, "scene_area": states_sorting[4] * states_sorting[5], "var_states": run_vars}
                 # create dataframe
-                #df = pd.json_normalize(data)
+                df = pd.json_normalize(states)
                 
                 # save to csv
-                #df.to_csv(cvs_file + "_all.csv", index=False, encoding="utf-8")
-                print(states_sorting)
+                df.to_csv(cvs_file + "_all.csv", index=False, encoding="utf-8")
                 #with open(cvs_file + "_states.csv", "w") as writeto:
                    #writer = csv.writer(writeto)
                    #for j in states_sorting:
