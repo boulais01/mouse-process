@@ -1,7 +1,6 @@
 """Collect the jsons of data and convert them into CSV files."""
 
 import json
-import csv
 import pandas as pd
 import os
 from pathlib import Path
@@ -41,8 +40,9 @@ for folder in path.iterdir():
                 time_dict["total_ms"] = states_sorting[2] - states_sorting[0]
                 last_time = states_sorting[0]
                 for passage in states_sorting[1]:
-                    time_dict[passage["passage"]] = passage["time"] - last_time
-                    last_time = passage["time"]
+                    if passage["passage"] != "The End":
+                        time_dict[passage["passage"]] = passage["time"] - last_time
+                        last_time = passage["time"]
                 
                 run_vars = var_defaults[states_sorting[7]]
                 sort_count = 8
@@ -50,6 +50,8 @@ for folder in path.iterdir():
                 for key in run_vars.keys():
                     run_vars[key] = states_sorting[sort_count]
                     sort_count += 1
+                    if sort_count >= len(states_sorting):
+                        break
 
                 states = {"times": time_dict, "scene_area": states_sorting[4] * states_sorting[5], "var_states": run_vars}
                 # create dataframe
