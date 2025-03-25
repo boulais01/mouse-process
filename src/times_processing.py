@@ -20,10 +20,15 @@ for file in path.iterdir():
                 passage_sort[row["passage"]].append({"time": int(row["time"]), "mouseX": int(row["mouseX"]), "mouseY": int(row["mouseY"])})
             except KeyError:
                 passage_sort[row["passage"]] = [{"time": int(row["time"]), "mouseX": int(row["mouseX"]), "mouseY": int(row["mouseY"])}]
-        sorted_passages = {}
         # order the list
         for passage in passage_sort.keys():
-            sorted_passages[passage] = sorted(passage_sort[passage], key=lambda x: x["time"])
-        
-print(all_passages)
+            passage_sort[passage] = sorted(passage_sort[passage], key=lambda x: x["time"])
+        passage_moves = {}
+        # calculate movement distances and times
+        for current in passage_sort.keys():
+            passage_moves[current] = []
+            for time in range(len(passage_sort[current]) - 1):
+                passage_moves[current].append({"time_length": passage_sort[current][time + 1]["time"] - passage_sort[current][time]["time"], "x_distance": passage_sort[current][time + 1]["mouseX"] - passage_sort[current][time]["mouseX"], "y_distance": passage_sort[current][time + 1]["mouseY"] - passage_sort[current][time]["mouseY"]})
+
+#print(passage_moves)
         
