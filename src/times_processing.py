@@ -1,5 +1,6 @@
 """Use the csv files to run final processing calculations and collate data for analysis."""
-
+# Specifically, calculates the time / distance for each movement in each passage
+# Also displays each unique passage visited
 import csv
 from pathlib import Path
 
@@ -31,4 +32,5 @@ for file in path.iterdir():
                 passage_moves[current].append({"time_length": passage_sort[current][time + 1]["time"] - passage_sort[current][time]["time"], "x_distance": passage_sort[current][time + 1]["mouseX"] - passage_sort[current][time]["mouseX"], "y_distance": passage_sort[current][time + 1]["mouseY"] - passage_sort[current][time]["mouseY"]})
 
 #print(passage_moves)
+print(all_passages)
         

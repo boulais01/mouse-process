@@ -1,4 +1,5 @@
 """Collect the jsons of data and convert them into CSV files."""
+# Specifically: sorts for use in times_processing and establishes overall times
 
 import json
 import pandas as pd
