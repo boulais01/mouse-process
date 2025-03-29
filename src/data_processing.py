@@ -14,7 +14,7 @@ var_defaults = {
                 }
 
 for folder in path.iterdir():
-    cvs_file = os.getcwd() + "\\processed\\" + str(folder)
+    csv_file = os.getcwd() + "\\processed\\" + str(folder)
     for file in folder.iterdir():
         if file.match("info*"):
             with file.open("r", encoding="utf-8") as i_file:
@@ -25,7 +25,7 @@ for folder in path.iterdir():
                 df = pd.json_normalize(data)
                 
                 # save to csv
-                df.to_csv(cvs_file + "_moves.csv", index=False, encoding="utf-8")
+                df.to_csv(csv_file + "_moves.csv", index=False, encoding="utf-8")
         elif file.match("states*"):
             states_sorting = {}
             with file.open("r", encoding="utf-8") as s_file:
@@ -59,5 +59,5 @@ for folder in path.iterdir():
                 df = pd.json_normalize(states)
                 
                 # save to csv
-                df.to_csv(cvs_file + "_states.csv", index=False, encoding="utf-8")
+                df.to_csv(csv_file + "_states.csv", index=False, encoding="utf-8")
             break     

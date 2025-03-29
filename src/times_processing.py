@@ -2,6 +2,7 @@
 # Specifically, calculates the time / distance for each movement in each passage
 # Also displays each unique passage visited
 import csv
+import pandas as pd
 from pathlib import Path
 
 path = Path("processed/research-data/data")
@@ -33,4 +34,12 @@ for file in path.iterdir():
 
 #print(passage_moves)
 print(all_passages)
+
+csv_file = Path("../processed/movements.csv")
+
+# create dataframe
+df = pd.json_normalize(passage_moves)
+                
+# save to csv
+df.to_csv(csv_file, index=False, encoding="utf-8")
         
