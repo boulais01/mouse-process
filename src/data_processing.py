@@ -4,14 +4,11 @@
 import json
 import pandas as pd
 import os
+
 from pathlib import Path
 
 path = Path("research-data/data")
-var_defaults = {
-                    "fetch": {"location": "", "plant_known": 0, "unicorn": 0, "armor": 1, "village": 0},
-                    "save": {"location": "", "armor": True, "sword": True, "injured": 0, "trophies_drake": False, "tunnel": False, "nest_know": False, "direction": "", "around": False, "approach": "", "chick": "", "griffin_hp": 4, "observed": False, "ledge": False, "dawn": 0, "trapped": False},
-                    "bandit": {"camp_known": False, "location": "", "direction": "", "armor": True, "sword": True, "injured": 0, "trophies_drake": False, "day": False, "spoken": False}
-                }
+#var_defaults = {}
 
 for folder in path.iterdir():
     csv_file = os.getcwd() + "\\processed\\" + str(folder)
@@ -45,16 +42,19 @@ for folder in path.iterdir():
                         time_dict[passage["passage"]] = passage["time"] - last_time
                         last_time = passage["time"]
                 
-                run_vars = var_defaults[states_sorting[7]]
+                #run_vars = var_defaults[states_sorting[7]]
                 sort_count = 8
+                """
                 # make a default dict for mountain versus forest save
                 for key in run_vars.keys():
                     run_vars[key] = states_sorting[sort_count]
                     sort_count += 1
                     if sort_count >= len(states_sorting):
-                        break
+                        break"
+                """
+                # states moved to html processing
 
-                states = {"times": time_dict, "scene_area": states_sorting[4] * states_sorting[5], "var_states": run_vars}
+                states = {"times": time_dict, "scene_area": states_sorting[4] * states_sorting[5]}
                 # create dataframe
                 df = pd.json_normalize(states)
                 
