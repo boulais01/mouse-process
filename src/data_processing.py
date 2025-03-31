@@ -52,7 +52,7 @@ for folder in path.iterdir():
                     if sort_count >= len(states_sorting):
                         break"
                 """
-                # states moved to html processing
+                # states moved to final processing
 
                 states = {"times": time_dict, "scene_area": states_sorting[4] * states_sorting[5]}
                 # create dataframe

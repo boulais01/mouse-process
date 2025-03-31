@@ -36,7 +36,7 @@ for file in path.iterdir():
 #print(passage_moves)
 print(all_passages)
 
-csv_file = Path("../processed/movements.csv")
+csv_file = Path("processed/movements.csv")
 
 # create dataframe
 df = pd.json_normalize(passage_moves)

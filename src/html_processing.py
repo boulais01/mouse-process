@@ -28,21 +28,36 @@ with open(Path("..\\comp-game\\comp specs collect.html"), "r", encoding="utf8") 
         # make sure there are choices
         if start != -1 and end != -1:
             for i in range(start, end):
-                choice = text[text.find("[[", i, end) :text.find("]]", i, end)]
+                choice: str = text[text.find("[[", i, end):text.find("]]", i, end)]
                 if choice != "":
-                    choice = choice.strip("[[]]")
+                    choice = choice.strip("[[]]\n.<</if>")
+                    if "Long Walk" in choice:
+                        choice = choice[0:choice.find("]")]
                     if "|" in choice:
                         has_var = choice.split("|")
-                        choices[choice_count] = [has_var[0], has_var[1]]
+                        if "]" in has_var[1]:
+                            var_starts = has_var[1].find("$")
+                            var_name = has_var[1][(var_starts+1):has_var[1].find(" ", var_starts)]
+                            var_val = has_var[1][(has_var[1].find("to", var_starts) + 2):]
+                            choices[choice_count] = [has_var[0].strip("[[]]\n."), has_var[1][0:var_starts].strip("[[]]\n."), {var_name:var_val}]
+                        else:
+                            choices[choice_count] = [has_var[0].strip("[[]]\n."), has_var[1].strip("[[]]\n.")]
                     else:
-                        choices[choice_count] = [choice, ""]
+                        if "]" in choice:
+                            var_starts = choice.find("$")
+                            var_name = choice[(var_starts+1):choice.find(" ", var_starts)]
+                            var_val = choice[(choice.find("to", var_starts) + 2):]
+                            choices[choice_count] = [choice[0:var_starts].strip("[[]]\n."), "", {var_name:var_val}]
+                        else:
+                            choices[choice_count] = [choice.strip("[[]]\n."), "", {}]
                     choice_count += 1
         passage_dict["choices"] = choices
+        #print(choices)
         all_passages.append(passage_dict)
     
 # print(all_passages)
 
-csv_file = Path("../processed/passages.csv")
+csv_file = Path("processed/passages.csv")
 
 # create dataframe
 df = pd.json_normalize(all_passages)

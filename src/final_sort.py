@@ -19,7 +19,7 @@ then another file for states,
 """
 # player num from the file count
 
-def get_states_default():
+def get_states_default() -> dict:
     """Get the states for each passage/path."""
     var_defaults = {}
     # iterate through the default path datasets
@@ -32,4 +32,7 @@ def get_states_default():
             # get each passage's states -- {"Passage Name": {"location": "forest", ...}, ...}
             # get each choice position -- {"Passage Name": {"Fetch the Majesty's Medicine": [(x,y), (x,y), (x,y), (x,y)], ...}}
             # combine -- {"Passage Name": {"States": {states}}, {"Choices"}: {choices}}
+
     return var_defaults
+
+# TODO: create a main that runs the other three processers, then the functions defined above
