@@ -1,8 +1,7 @@
 """Collecting all of the data parsed in other files into the final uses for analysis."""
 
-import pandas as pd
 import json
-import os
+import ast  
 import csv
 
 from pathlib import Path
@@ -19,9 +18,17 @@ then another file for states,
 """
 # player num from the file count
 
+#def get_choice_pos() -> dict:
+#    """Sort through the choices from html_processing and the values from the states."""
+
+
 def get_states_default() -> dict:
     """Get the states for each passage/path."""
+    consts = ['playtime', 'history', 'started', 'tracking', 'press_count', 'passage_count', 'passage_sets', 'passage_links', 'mouse_movements']
     var_defaults = {}
+    states_dict = {}
+    passage_press = {}
+    choices_dict ={}
     # iterate through the default path datasets
     for states in states_path.iterdir():
         with states.open("r", encoding="utf-8") as state:
@@ -32,7 +39,40 @@ def get_states_default() -> dict:
             # get each passage's states -- {"Passage Name": {"location": "forest", ...}, ...}
             # get each choice position -- {"Passage Name": {"Fetch the Majesty's Medicine": [(x,y), (x,y), (x,y), (x,y)], ...}}
             # combine -- {"Passage Name": {"States": {states}}, {"Choices"}: {choices}}
+            rows = data[0]
+            # dict_keys(['passage', 'variables'])
+            #print(row["variables"].keys())
+            #dict_keys(['playtime', 'history', 'started', 'tracking', 'press_count', 'passage_count', 'passage_sets', 'passage_links', 'mouse_movements', 'quest', 'location', 'armor', 'sword', 'injured', 'trophies_drake', 'tunnel', 'nest_know', 'direction', 'trapped'])
+            for row in rows:
+                # get states
+                if row["passage"] not in states_dict.keys():
+                    states_dict[row["passage"]] = {}
+                for key in row["variables"].keys():
+                    if key not in consts:
+                        if key not in states_dict[row["passage"]].keys():
+                            states_dict[row["passage"]][key] = row["variables"][key]
 
+                    # get choice positions
+                    if key == "mouse_movements" and row == rows[len(rows) - 1]:
+                        for press in row["variables"][key]:
+                            if press["passage"] not in passage_press.keys():
+                                passage_press[press["passage"]] = []
+                            passage_press[press["passage"]].append({press["press"]:(press["mouseX"], press["mouseY"])})
+    # get choice from the passages.csv file
+    reader = csv.DictReader(open(Path("processed/passages.csv")))
+
+    for row in reader:
+        choice_list = []
+        for i in range(len(row) - 2):
+            if row["choices." + str(i)] != "" and row["choices." + str(i)] != " ":
+                unstring_choice = ast.literal_eval(row["choices." + str(i)])
+                choice_list.append(unstring_choice[0])
+        choices_dict[row["name"]] = choice_list
+    
+    #if x1 > x2 and y4 < y3:
+    #elif x1 > x2 and y4 > y3:
     return var_defaults
 
 # TODO: create a main that runs the other three processers, then the functions defined above
+
+get_states_default()

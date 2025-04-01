@@ -7,6 +7,15 @@ from pathlib import Path
 
 all_passages = []
 
+def check_choice(choices: dict, choice: list, choice_count: int) -> tuple:
+    """Check if a choice has already been included in the dict, and add it if it hasn't."""
+    for chose in choices:
+        if choices[chose] == choice:
+            return choices, choice_count
+    choices[choice_count] = choice
+    choice_count += 1
+    return choices, choice_count
+
 with open(Path("..\\comp-game\\comp specs collect.html"), "r", encoding="utf8") as html_path:
     # extract file
     soup = BeautifulSoup(html_path, features="lxml")
@@ -31,26 +40,25 @@ with open(Path("..\\comp-game\\comp specs collect.html"), "r", encoding="utf8") 
                 choice: str = text[text.find("[[", i, end):text.find("]]", i, end)]
                 if choice != "":
                     choice = choice.strip("[[]]\n.<</if>")
-                    if "Long Walk" in choice:
-                        choice = choice[0:choice.find("]")]
+                    if "]]" in choice:
+                        choice = choice[0:choice.find("]]")]
                     if "|" in choice:
                         has_var = choice.split("|")
                         if "]" in has_var[1]:
                             var_starts = has_var[1].find("$")
                             var_name = has_var[1][(var_starts+1):has_var[1].find(" ", var_starts)]
                             var_val = has_var[1][(has_var[1].find("to", var_starts) + 2):]
-                            choices[choice_count] = [has_var[0].strip("[[]]\n."), has_var[1][0:var_starts].strip("[[]]\n."), {var_name:var_val}]
+                            choices, choice_count = check_choice(choices, [has_var[0].strip("[[]]\n."), has_var[1][0:var_starts].strip("[[]]\n."), {var_name:var_val}], choice_count)
                         else:
-                            choices[choice_count] = [has_var[0].strip("[[]]\n."), has_var[1].strip("[[]]\n.")]
+                            choices, choice_count = check_choice(choices, [has_var[0].strip("[[]]\n."), has_var[1].strip("[[]]\n.")], choice_count)
                     else:
                         if "]" in choice:
                             var_starts = choice.find("$")
                             var_name = choice[(var_starts+1):choice.find(" ", var_starts)]
                             var_val = choice[(choice.find("to", var_starts) + 2):]
-                            choices[choice_count] = [choice[0:var_starts].strip("[[]]\n."), "", {var_name:var_val}]
+                            choices, choice_count = check_choice(choices, [choice[0:var_starts].strip("[[]]\n."), "", {var_name:var_val}], choice_count)
                         else:
-                            choices[choice_count] = [choice.strip("[[]]\n."), "", {}]
-                    choice_count += 1
+                            choices, choice_count = check_choice(choices, [choice.strip("[[]]\n."), "", {}], choice_count)
         passage_dict["choices"] = choices
         #print(choices)
         all_passages.append(passage_dict)

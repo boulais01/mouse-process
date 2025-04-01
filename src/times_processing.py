@@ -33,6 +33,14 @@ for file in path.iterdir():
             for time in range(len(passage_sort[current]) - 1):
                 passage_moves[current].append({"time_length": passage_sort[current][time + 1]["time"] - passage_sort[current][time]["time"], "x_distance": passage_sort[current][time + 1]["mouseX"] - passage_sort[current][time]["mouseX"], "y_distance": passage_sort[current][time + 1]["mouseY"] - passage_sort[current][time]["mouseY"]})
 
+        csv_file = "processed/movements"
+
+        # create dataframe
+        df = pd.json_normalize(passage_moves)
+                
+        # save to csv
+        df.to_csv(Path(csv_file + file.stem[4] + ".csv"), index=False, encoding="utf-8")  
+
 #print(passage_moves)
 print(all_passages)
 
