@@ -18,9 +18,20 @@ then another file for states,
 """
 # player num from the file count
 
-#def get_choice_pos() -> dict:
-#    """Sort through the choices from html_processing and the values from the states."""
-
+def check_choice_pos(passage_press: dict) -> dict:
+    """Sort through the click positions to ensure no repeats."""
+    uniquified_passage = {}
+    prevX = 0
+    prevY = 0
+    for passage in passage_press.keys():
+        uniquified_passage[passage] = []
+        for pos in passage_press[passage]:
+            if prevX != 0 and prevY != 0:
+                if prevX != pos[1] or prevY != pos[2]:
+                    uniquified_passage[passage].append(pos)
+            prevX = pos[1]
+            prevY = pos[2]
+    return uniquified_passage
 
 def get_states_default() -> dict:
     """Get the states for each passage/path."""
@@ -57,7 +68,7 @@ def get_states_default() -> dict:
                         for press in row["variables"][key]:
                             if press["passage"] not in passage_press.keys():
                                 passage_press[press["passage"]] = []
-                            passage_press[press["passage"]].append({press["press"]:(press["mouseX"], press["mouseY"])})
+                            passage_press[press["passage"]].append((press["press"], press["mouseX"], press["mouseY"]))
     # get choice from the passages.csv file
     reader = csv.DictReader(open(Path("processed/passages.csv")))
 
@@ -68,7 +79,11 @@ def get_states_default() -> dict:
                 unstring_choice = ast.literal_eval(row["choices." + str(i)])
                 choice_list.append(unstring_choice[0])
         choices_dict[row["name"]] = choice_list
-    
+
+    unique_pass_press = check_choice_pos(passage_press)
+    for key in choices_dict.keys():
+        if key in unique_pass_press.keys():
+            print(choices_dict[key], unique_pass_press[key])
     #if x1 > x2 and y4 < y3:
     #elif x1 > x2 and y4 > y3:
     return var_defaults
