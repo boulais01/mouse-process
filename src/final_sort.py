@@ -21,12 +21,12 @@ then another file for states,
 def check_choice_pos(passage_press: dict) -> dict:
     """Sort through the click positions to ensure no repeats."""
     uniquified_passage = {}
-    prevX = 0
-    prevY = 0
+    prevX = -1
+    prevY = -1
     for passage in passage_press.keys():
         uniquified_passage[passage] = []
         for pos in passage_press[passage]:
-            if prevX != 0 and prevY != 0:
+            if prevX != -1 and prevY != -1:
                 if prevX != pos[1] or prevY != pos[2]:
                     uniquified_passage[passage].append(pos)
             prevX = pos[1]
@@ -39,7 +39,8 @@ def get_states_default() -> dict:
     var_defaults = {}
     states_dict = {}
     passage_press = {}
-    choices_dict ={}
+    choices_dict = {}
+    choice_points = {}
     # iterate through the default path datasets
     for states in states_path.iterdir():
         with states.open("r", encoding="utf-8") as state:
@@ -75,15 +76,20 @@ def get_states_default() -> dict:
     for row in reader:
         choice_list = []
         for i in range(len(row) - 2):
-            if row["choices." + str(i)] != "" and row["choices." + str(i)] != " ":
-                unstring_choice = ast.literal_eval(row["choices." + str(i)])
-                choice_list.append(unstring_choice[0])
-        choices_dict[row["name"]] = choice_list
+            try:
+                if row["choices." + str(i)] != "" and row["choices." + str(i)] != " ":
+                    unstring_choice = ast.literal_eval(row["choices." + str(i)])
+                    choice_list.append(unstring_choice[0])
+            except KeyError:
+                continue
+        choices_dict[row["name"]] = (choice_list, row["if"], row["choice_sets"])
 
     unique_pass_press = check_choice_pos(passage_press)
     for key in choices_dict.keys():
         if key in unique_pass_press.keys():
-            print(choices_dict[key], unique_pass_press[key])
+            #print(choices_dict[key], unique_pass_press[key])
+            if choices_dict[key][1] == "True":
+                print(choices_dict[key][0], choices_dict[key][2])
     #if x1 > x2 and y4 < y3:
     #elif x1 > x2 and y4 > y3:
     return var_defaults
