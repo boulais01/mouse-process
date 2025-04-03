@@ -29,17 +29,19 @@ for file in path.iterdir():
         passage_moves = {}
         # calculate movement distances and times
         for current in passage_sort.keys():
-            passage_moves[current] = []
+            passage_moves[current + " Shifts"] = []
             for time in range(len(passage_sort[current]) - 1):
-                passage_moves[current].append({"time_length": passage_sort[current][time + 1]["time"] - passage_sort[current][time]["time"], "x_distance": passage_sort[current][time + 1]["mouseX"] - passage_sort[current][time]["mouseX"], "y_distance": passage_sort[current][time + 1]["mouseY"] - passage_sort[current][time]["mouseY"]})
+                passage_moves[current  + " Shifts"].append({"time_length": passage_sort[current][time + 1]["time"] - passage_sort[current][time]["time"], "x_distance": passage_sort[current][time + 1]["mouseX"] - passage_sort[current][time]["mouseX"], "y_distance": passage_sort[current][time + 1]["mouseY"] - passage_sort[current][time]["mouseY"]})
 
-        csv_file = "processed/movements"
+        if file.stem[5] == "_":
+            csv_file = Path("processed/movements" + file.stem[4] + ".csv")
+        else:
+            csv_file = Path("processed/movements" + file.stem[4] + file.stem[5] + ".csv")
 
-        # create dataframe
-        df = pd.json_normalize(passage_moves)
-                
-        # save to csv
-        df.to_csv(Path(csv_file + file.stem[4] + ".csv"), index=False, encoding="utf-8")  
+        with open(csv_file, mode='w', newline='') as file_write:
+            writer = csv.DictWriter(file_write, fieldnames=passage_moves.keys())
+            writer.writeheader()
+            writer.writerow(passage_moves)
 
 #print(passage_moves)
 print(all_passages)
