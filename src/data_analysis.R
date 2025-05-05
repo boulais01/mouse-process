@@ -2,7 +2,6 @@ library(factoextra)
 library(cluster)
 library(dplyr)
 #library(fpc)
-
 moves_data <- read.csv("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/final_moves.csv", header=TRUE)
 states_data <- read.csv("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/final_states.csv", header=TRUE)
 print("data opened")
@@ -18,49 +17,56 @@ print("plot done")
 kmeans <- pam(states_data, 3)
 plot(kmeans)
 
-files <- list.files(path="C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/", pattern="*.csv", full.names = TRUE)
+files <- list.files(path="C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages", pattern="*.csv", full.names = TRUE)
+#files <- list.files(path="C:/Users/Exalt/cmpsci/comp/data-analysis/processed/research-data/data", pattern="*moves.csv", full.names = TRUE)
 counter <- 0
 # Iterate over each file
 for (file in files) {
   # Separate the name
   file_name <- sub("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/*", "", file)
+  #file_name <- sub("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/research-data/data/*", "", file)
+  file_name <- sub(".csv", "", file_name)
   
   # Read the file
   data <- read.csv(file, header=TRUE)
-  grouped_df <- df %>% group_by(Player_Num)
-  # Compute divisive hierarchical clustering
-  hc <- diana(data)
-  # Divise coefficient
-  hc$dc
-  print("computation complete")
-  # Plot obtained dendrogram
-  pltree(hc, cex = 0.6, hang = -1, main = sprintf("Dendrogram of Player Moves in %s", file_name))
-  print("plot done")
-  df <- scale(data)
-  #fviz_nbclust(df, FUNcluster = kmeans(df, centers = 4, nstart = 25), method = "wss")
-  #calculate gap statistic based on number of clusters
-  #gap_stat <- clusGap(df,
-   #                   FUNcluster = kmeans(df, centers = 4, nstart = 25),
-    #                  nstart = 25,
-     #                 K.max = 10,
-      #                B = 50)
   
-  #plot number of clusters vs. gap statistic
-  #fviz_gap_stat(gap_stat)
+  move_data <- data[, which(names(data) != "Player_Num")]
+  uniq_data <- move_data %>% distinct(Move_Label, .keep_all = TRUE)
+  df <- data.frame(uniq_data, row.names = "Move_Label")
   
-  #perform k-means clustering with k = 4 clusters
-  km <- kmeans(df, centers = 4, nstart = 25)
+  # apply kmeans
+  km_res <- kmeans(df,10,iter.max = 1000,
+                   nstart=10,algorithm="MacQueen")
   
-  #view results
-  km
+  sil <- silhouette(km_res$cluster, dist(df))
   
-  #plot results of final k-means model
-  fviz_cluster(km, data = df)
+  # plot silhouette
+  fviz_silhouette(sil)
+  plot(sil, main = sprintf("Silhouette of Player Moves in %s", file_name))
   
-  #find means of each cluster
-  aggregate(data, by=list(cluster=km$cluster), mean)
   
-  final_data <- cbind(data, cluster = km$cluster)
+  #hc <- diana(data)
+  #hc$dc
+  #pltree(hc, main = sprintf("Dendrogram of Passage Moves in %s", file_name))
+  file.create(sprintf("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/pngs/%s.png", file_name))
+  png(sprintf("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/pngs/%s.png", file_name))
   
-  head(final_data)
+  dclust_data <- diana(df)
+  print(dclust_data$dc)
+  pltree(dclust_data, hang = -1, cex = 0.6, main = sprintf("Dendrogram of Player Moves in %s", file_name))
+  dev.off()
+  
+  
+  file.create(sprintf("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/tables/%s.txt", file_name))
+  cat(dclust_data$dc, file = sprintf("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/tables/%s.txt", file_name), sep = "")
+  
+  #aggregate(dclust_data, by=list(cluster=dclust_data$cluster))
+  #print(dclust_data$height)
+  #plot(cut(dclust_data, h=dclust_data$height)$upper, 
+  #     main="Upper tree of cut at half length")
+  #plot(cut(dclust_data, h=75)$lower[[2]], 
+  #     main="Second branch of lower tree with cut at half length")
+  
+  #print()
+
 }

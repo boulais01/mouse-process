@@ -48,7 +48,7 @@ for folder in path.iterdir():
                 for count in range(8, len(states_sorting)):
                     run_vars["var" + str(count)] = states_sorting[count]
                 # states moved to final processing
-
+                
                 states = {"times": time_dict, "scene_area": states_sorting[4] * states_sorting[5], "states": run_vars}
                 # create dataframe
                 df = pd.json_normalize(states)

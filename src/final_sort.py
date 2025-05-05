@@ -80,7 +80,7 @@ def get_passage_choice(passage: str, choices_dict: dict) -> dict:
     #elif x1 > x2 and y4 > y3:
 
 
-def get_states_default() -> dict:
+def get_states_default():
     """Get the states for each passage/path."""
     consts = ['playtime', 'history', 'started', 'tracking', 'press_count', 'passage_count', 'passage_sets', 'passage_links', 'mouse_movements']
     states_dict = {}
@@ -143,7 +143,7 @@ var_defaults, quest_defaults, synthesis = get_states_default()
 # choices present in each passage in the base states and their positions, as {"presses": {"passage_name": [(x,y),..]}, "links": {"passage_name": [link_tracking_info]}}
 choice_info = get_choices_pos()
 
-# TODO: for loop for each movements, get player num then by passage basis for other factors
+# for loop for each movements, get player num then by passage basis for other factors
 # get_passage_choice(passage: str, states: dict) for passing in a passage name and states and getting choice pos dict
 """
     final processing make the data points all in one file, formatted
@@ -155,6 +155,7 @@ choice_info = get_choices_pos()
 all_states = []
 states_fieldnames = ["Player_Num"]
 all_moves = []
+by_passage = {}
 for i in range(1, 14):
     passages = []
     if i != 4:
@@ -210,8 +211,27 @@ for i in range(1, 14):
                 count += 1
                 if count >= len(states_list):
                     break
-        all_states.append(state)    
-            
+        all_states.append(state)  
+
+move_num = 0
+for move in all_moves:
+    if move["Passage"] not in by_passage.keys():
+        by_passage[move["Passage"]] = []
+    by_passage[move["Passage"]].append({"Player_Num": move["Player_Num"], "Move_Label": str(move["Player_Num"]) + "." + str(move_num), "Time_ms": move["Time_ms"], "MouseX": move["MouseX"], "MouseY": move["MouseY"]})
+    move_num += 1
+
+base_passage_path = Path(passages_path, "passages")
+players_in_pass = {}
+for key in by_passage.keys():
+    player_nums = {record["Player_Num"] for record in by_passage[key] if record["Player_Num"] != ""}
+    players_in_pass[key] = player_nums
+    if len(player_nums) > 1:
+        #print(f"Writing passage {key} with {player_nums}")
+        with open(Path(base_passage_path, str(key) + ".csv"), mode="w", newline="") as passage_file:
+            writer = csv.DictWriter(passage_file, fieldnames=["Player_Num", "Move_Label", "Time_ms", "MouseX", "MouseY"])
+            writer.writeheader()
+            writer.writerows(by_passage[key])
+         
 all_moves_path = Path(passages_path, "final_moves.csv")
 all_states_path = Path(passages_path, "final_states.csv")
 
