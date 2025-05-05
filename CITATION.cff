@@ -1,0 +1,9 @@
+cff-version: 1.0.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Boulais"
+  given-names: "Mordred"
+title: "mouse-process"
+version: v1.3.0
+date-released: 2025-05-05
+url: "https://github.com/boulais01/mouse-process"
