@@ -60,6 +60,20 @@ for (file in files) {
   file.create(sprintf("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/tables/%s.txt", file_name))
   cat(dclust_data$dc, file = sprintf("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/tables/%s.txt", file_name), sep = "")
   
+  file.create(sprintf("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/pngs/notime_%s.png", file_name))
+  png(sprintf("C:/Users/Exalt/cmpsci/comp/data-analysis/processed/passages/pngs/notime_%s.png", file_name))
+  
+  move_data <- data[, which(names(data) != "Player_Num")]
+  no_time <- data[, which(names(data) != "Time_ms")]
+  uniq_data <- no_time %>% distinct(Move_Label, .keep_all = TRUE)
+  df <- data.frame(uniq_data, row.names = "Move_Label")
+  
+  dclust_data <- diana(df)
+  print(dclust_data$dc)
+  pltree(dclust_data, hang = -1, cex = 0.6, main = sprintf("Dendrogram of Player Moves in %s", file_name))
+  dev.off()
+  
+  
   #aggregate(dclust_data, by=list(cluster=dclust_data$cluster))
   #print(dclust_data$height)
   #plot(cut(dclust_data, h=dclust_data$height)$upper, 
